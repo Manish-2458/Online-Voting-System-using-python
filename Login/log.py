@@ -66,7 +66,7 @@ var1 = IntVar()
 my_check = tb.Checkbutton(my_frame, bootstyle="primary", text="Remember Me", variable=var1, onvalue=1, offvalue=0)
 my_check.pack(pady=(70,0))
 
-original_image = Image.open("emblem.png")
+original_image = Image.open("india.png")
 resized_image = original_image.resize((90, 90))
 logo_image = ImageTk.PhotoImage(resized_image)
 

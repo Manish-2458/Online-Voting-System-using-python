@@ -57,7 +57,7 @@ my_entry.pack(pady=20, padx=20)
 my_button = tb.Button(my_frame, text="Register Now ➡️", bootstyle="success", command=forward)
 my_button.pack(side=BOTTOM, pady=(100, 10))
 
-original_image = Image.open("emblem.png")
+original_image = Image.open("india.png")
 resized_image = original_image.resize((90, 90))
 logo_image = ImageTk.PhotoImage(resized_image)
 
