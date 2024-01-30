@@ -9,7 +9,9 @@ class ImageApp:
         self.root.title("Voting Interface Module")
         self.root.attributes("-fullscreen", True)
 
-        self.folder_path = "Party_Symbols"
+        # self.folder_path = "Party_Symbols"
+        self.folder_path = os.path.join(os.path.dirname(__file__), "Party_Symbols")
+
         self.image_files = [f for f in os.listdir(self.folder_path) if f.endswith(('.png'))]
 
         self.images = []
@@ -25,21 +27,24 @@ class ImageApp:
         ''')
         self.connection.commit()
 
+        self.canvas = None  # Initialize canvas attribute
+
         self.create_widgets()
+        self.bind_mouse_scroll()  # Bind mouse scroll event after canvas creation
 
     def create_widgets(self):
         header_label = tk.Label(self.root, text="Choose Political Party for Parliament", font=("Helvetica", 18), pady=20, fg="blue")
         header_label.pack()
 
-        canvas = tk.Canvas(self.root, height=self.root.winfo_screenheight())
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.canvas = tk.Canvas(self.root, height=self.root.winfo_screenheight())
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        scrollbar = tk.Scrollbar(self.root, command=canvas.yview)
+        scrollbar = tk.Scrollbar(self.root, command=self.canvas.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        canvas.configure(yscrollcommand=scrollbar.set)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
 
-        frame = tk.Frame(canvas)
-        canvas.create_window((0, 0), window=frame, anchor=tk.NW)
+        frame = tk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=frame, anchor=tk.NW)
 
         self.frame_width = 300
         self.frame_height = 300
@@ -70,12 +75,14 @@ class ImageApp:
                 row_count += 1
 
         frame.update_idletasks()
-        canvas.config(scrollregion=canvas.bbox("all"))
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-        canvas.bind("<MouseWheel>", lambda event: self.on_mouse_scroll(event))
+    def bind_mouse_scroll(self):
+        self.root.bind("<MouseWheel>", self.on_mouse_scroll)
 
     def on_mouse_scroll(self, event):
-        tk.Canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        if self.canvas:
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def button_click(self, file_name):
         print(f"Button clicked for {file_name}")
