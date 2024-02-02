@@ -3,7 +3,8 @@ import tkinter as tk
 import ttkbootstrap as tb
 import sqlite3
 import datetime
-from tkinter import IntVar
+import subprocess
+from tkinter import IntVar, messagebox
 from PIL import Image, ImageTk
 
 def create_table():
@@ -26,17 +27,30 @@ def insert_data(election_id, date_of_birth):
     conn.commit()
     conn.close()
 
+def is_already_voted(election_id):
+    conn = sqlite3.connect('userdata.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE election_id = ?', (election_id,))
+    result = c.fetchone()
+    conn.close()
+    return result is not None
+
 def checker():
-    election_id = my_entry1.get()
-    date_of_birth = my_entry2.get()
+    election_id = entry_election_id.get()
+    date_of_birth = entry_dob.get()
 
     try:
         datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
     except ValueError:
-        print("Invalid date format. Please enter date in YYYY-MM-DD format.")
+        messagebox.showerror("Error", "Invalid date format. Please enter date in YYYY-MM-DD format.")
         return
 
-    insert_data(election_id, date_of_birth)
+    if is_already_voted(election_id):
+        messagebox.showinfo("Already Voted", "This election ID has already voted.")
+    else:
+        insert_data(election_id, date_of_birth)
+        messagebox.showinfo("Success", "Login successful.")
+        subprocess.run(["python", "/Users/sreeram/Documents/GitHub/Online-Voting-System-using-python/Voting_Interface_Module/Voting Interface Module.py"])
 
 def on_entry_click(event, entry_widget, default_text):
     if entry_widget.get() == default_text:
@@ -47,18 +61,17 @@ def on_focus_out(event, entry_widget, default_text):
     if entry_widget.get() == "":
         entry_widget.insert(0, default_text)
         entry_widget.config(fg='grey')
+
 root = tb.Window(themename="litera", iconphoto=None)
 root.configure(bg="#f5f5f5")
-
 root.attributes('-fullscreen', True)
-
 root.title("Log In ")
 
 registration_label = tb.Label(root, text="Login", font=("Roboto", 40, "bold"))
 registration_label.pack(pady=(50,0))
 registration_label.configure(style="Primary.TLabel")
 
-my_frame = LabelFrame(root ,font=("Roboto", 16, "bold"), background="#00FFFF", padx=100, pady=100)
+my_frame = LabelFrame(root, font=("Roboto", 16, "bold"), background="#00FFFF", padx=100, pady=100)
 my_frame.place(relx=0.5, rely=0.5, anchor='center')
 
 entry_election_id = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey')
@@ -67,7 +80,6 @@ entry_election_id.bind("<FocusIn>", lambda event: on_entry_click(event, entry_el
 entry_election_id.bind("<FocusOut>", lambda event: on_focus_out(event, entry_election_id, "Election ID"))
 entry_election_id.pack(pady=15, padx=20)
 
-# Entry for Date of Birth
 entry_dob = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey')
 entry_dob.insert(0, "Date of Birth")
 entry_dob.bind("<FocusIn>", lambda event: on_entry_click(event, entry_dob, "Date of Birth"))
