@@ -1,56 +1,33 @@
 from tkinter import *
 import tkinter as tk
 import ttkbootstrap as tb
-import sqlite3
 import datetime
-import subprocess
-from tkinter import IntVar, messagebox
 from PIL import Image, ImageTk
+import openpyxl
 
-def create_table():
-    conn = sqlite3.connect('userdata.db')
-    c = conn.cursor()
-    c.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    election_id TEXT,
-                    date_of_birth DATE
-                )
-                ''')
-    conn.commit()
-    conn.close()
+def check_credentials(election_id, date_of_birth):
+    try:
+        datetime.datetime.strptime(date_of_birth, '%Y/%m/%d')
+    except ValueError:
+        return False
 
-def insert_data(election_id, date_of_birth):
-    conn = sqlite3.connect('userdata.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO users (election_id, date_of_birth) VALUES (?, ?)', (election_id, date_of_birth))
-    conn.commit()
-    conn.close()
-
-def is_already_voted(election_id):
-    conn = sqlite3.connect('userdata.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM users WHERE election_id = ?', (election_id,))
-    result = c.fetchone()
-    conn.close()
-    return result is not None
+    wb = openpyxl.load_workbook("userdata.xlsx")
+    ws = wb.active
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        excel_dob = row[1].strftime('%Y/%m/%d')
+        if str(row[0]).strip() == str(election_id).strip() and str(excel_dob).strip() == str(date_of_birth).strip():
+            return True
+    return False
 
 def checker():
-    election_id = entry_election_id.get()
-    date_of_birth = entry_dob.get()
+    election_id = Election_ID.get()
+    date_of_birth = DOB.get()
 
-    try:
-        datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
-    except ValueError:
-        messagebox.showerror("Error", "Invalid date format. Please enter date in YYYY-MM-DD format.")
-        return
-
-    if is_already_voted(election_id):
-        messagebox.showinfo("Already Voted", "This election ID has already voted.")
+    if check_credentials(election_id, date_of_birth):
+        login_label.config(text="Login Successful", fg="green")  # Update label with successful message
+        # Add code to show successful message or navigate to another window
     else:
-        insert_data(election_id, date_of_birth)
-        messagebox.showinfo("Success", "Login successful.")
-        subprocess.run(["python", "/Users/sreeram/Documents/GitHub/Online-Voting-System-using-python/Voting_Interface_Module/Voting Interface Module.py"])
+        login_label.config(text="Invalid credentials", fg="red")  # Update label with error message
 
 def on_entry_click(event, entry_widget, default_text):
     if entry_widget.get() == default_text:
@@ -64,30 +41,41 @@ def on_focus_out(event, entry_widget, default_text):
 
 root = tb.Window(themename="litera", iconphoto=None)
 root.configure(bg="#f5f5f5")
+
 root.attributes('-fullscreen', True)
+
 root.title("Log In ")
 
 registration_label = tb.Label(root, text="Login", font=("Roboto", 40, "bold"))
 registration_label.pack(pady=(50,0))
 registration_label.configure(style="Primary.TLabel")
 
-my_frame = LabelFrame(root, font=("Roboto", 16, "bold"), background="#00FFFF", padx=100, pady=100)
+my_frame = LabelFrame(root ,font=("Roboto", 16, "bold"), background="#00FFFF", padx=100, pady=100)
 my_frame.place(relx=0.5, rely=0.5, anchor='center')
 
-entry_election_id = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey')
+# StringVars for Election ID and Date of Birth
+Election_ID = tk.StringVar()
+DOB = tk.StringVar()
+
+entry_election_id = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey', textvariable=Election_ID)
 entry_election_id.insert(0, "Election ID")
 entry_election_id.bind("<FocusIn>", lambda event: on_entry_click(event, entry_election_id, "Election ID"))
 entry_election_id.bind("<FocusOut>", lambda event: on_focus_out(event, entry_election_id, "Election ID"))
 entry_election_id.pack(pady=15, padx=20)
 
-entry_dob = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey')
-entry_dob.insert(0, "Date of Birth")
-entry_dob.bind("<FocusIn>", lambda event: on_entry_click(event, entry_dob, "Date of Birth"))
-entry_dob.bind("<FocusOut>", lambda event: on_focus_out(event, entry_dob, "Date of Birth"))
+# Entry for Date of Birth
+entry_dob = tk.Entry(my_frame, font=("Roboto", 16), width=30, fg='grey', textvariable=DOB)
+entry_dob.insert(0, "Date of Birth (YYYY/MM/DD)")
+entry_dob.bind("<FocusIn>", lambda event: on_entry_click(event, entry_dob, "Date of Birth (YYYY/MM/DD)"))
+entry_dob.bind("<FocusOut>", lambda event: on_focus_out(event, entry_dob, "Date of Birth (YYYY/MM/DD)"))
 entry_dob.pack(pady=15, padx=20)
 
 my_button = tb.Button(my_frame, text="Log In →", bootstyle="success", command=checker)
 my_button.pack(pady=(60,0), padx=20)
+
+# Label to display login status
+login_label = Label(my_frame, font=("Roboto", 16))
+login_label.pack(pady=(20,0))
 
 original_image = Image.open("emblem.png")
 resized_image = original_image.resize((90, 90))
@@ -98,7 +86,5 @@ logo_label.place(relx=0.5, rely=1.0, anchor='s', y=-30)
 
 root.option_add("*Font", "Roboto")
 root.option_add("*Entry.highlightcolor", "#54a0ff")
-
-create_table()
 
 root.mainloop()
