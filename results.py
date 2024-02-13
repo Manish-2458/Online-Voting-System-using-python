@@ -15,10 +15,10 @@ def load_excel_data(file_path):
         return None
 
 def update_display():
-    selected_Location = Location_var.get()
+    selected_Position = Position_var.get()
     filtered_df = original_df.copy()
-    if selected_Location != "All":
-        filtered_df = filtered_df[filtered_df['Location'] == selected_Location]
+    if selected_Position != "All":
+        filtered_df = filtered_df[filtered_df['Position'] == selected_Position]
 
     update_treeview(filtered_df)
 
@@ -32,22 +32,22 @@ def update_treeview(data_frame):
         tree.insert("", "end", values=list(row))
 
 def show_statistical_analysis():
-    selected_Location = Location_var.get()
+    selected_Position = Position_var.get()
 
     filtered_df = original_df.copy()
-    if selected_Location != "All":
-        filtered_df = filtered_df[filtered_df['Location'] == selected_Location]
+    if selected_Position != "All":
+        filtered_df = filtered_df[filtered_df['Position'] == selected_Position]
 
     plt.figure(figsize=(8, 6))
 
-    parties = filtered_df['Party']
+    parties = filtered_df['Party_representation']
     votes = filtered_df['Votes']
 
     colors = cm.get_cmap('viridis', len(parties))
 
-    for party, vote, color in zip(parties, votes, colors(range(len(parties)))):
-        plt.bar(party, vote, label=f'{vote}', color=color, edgecolor='black', linewidth=0.5, alpha=0.7, align='center')
-        plt.text(party, vote + 0.1, str(vote), ha='center', va='bottom')
+    for Party_representation, vote, color in zip(parties, votes, colors(range(len(parties)))):
+        plt.bar(Party_representation, vote, label=f'{vote}', color=color, edgecolor='black', linewidth=0.5, alpha=0.7, align='center')
+        plt.text(Party_representation, vote + 0.1, str(vote), ha='center', va='bottom')
 
     plt.xlabel('Parties')
     plt.ylabel('Votes')
@@ -97,24 +97,24 @@ right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 file_path = "sample.xlsx"
 original_df = load_excel_data(file_path)
 
-localities = ["All"] + original_df['Location'].unique().tolist()
+localities = ["All"] + original_df['Position'].unique().tolist()
 
-Location_var = tk.StringVar(root)
-Location_var.set("All")
+Position_var = tk.StringVar(root)
+Position_var.set("All")
 
-Location_menu = ttk.Combobox(right_column, textvariable=Location_var, values=localities)
+Position_menu = ttk.Combobox(right_column, textvariable=Position_var, values=localities)
 
 apply_filter_button = tk.Button(right_column, text="Apply Filter", command=update_display)
 statistical_analysis_button = tk.Button(right_column, text="Statistical Analysis", state=tk.DISABLED, command=show_statistical_analysis)
 exit_button = tk.Button(right_column, text="Exit", command=exit_program)
 
 font_style = ('Helvetica', 12)
-Location_menu.config(font=font_style)
+Position_menu.config(font=font_style)
 apply_filter_button.config(font=font_style)
 statistical_analysis_button.config(font=font_style)
 exit_button.config(font=font_style)
 
-Location_menu.pack(pady=20)
+Position_menu.pack(pady=20)
 apply_filter_button.pack(pady=10)
 
 tree_columns = original_df.columns.tolist()
