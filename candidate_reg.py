@@ -2,13 +2,15 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from PIL import Image, ImageTk
 from ttkbootstrap import Style
+from openpyxl import Workbook, load_workbook
+import os
 
 class CandidateManagementSystem:
     def __init__(self, root):
         self.root = root
         self.root.title("Candidate Management System")
 
-        self.style = Style("darkly")
+        #self.style = Style("lumen")
         self.root.attributes("-fullscreen", True)
         self.candidates = []
         self.admin_username = "admin"
@@ -20,6 +22,7 @@ class CandidateManagementSystem:
         self.create_add_delete_candidate_section()
         self.create_table_section()
         self.create_ec_view_modify_section()
+        self.load_candidates_from_excel() 
         for i in range(8):
             self.root.grid_columnconfigure(i, weight=1)
 
@@ -27,6 +30,29 @@ class CandidateManagementSystem:
             self.root.grid_rowconfigure(i, weight=1)
 
         tk.Label(root, text="").grid(row=13, column=0)
+
+
+    def save_candidates_to_excel(self):
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["Name", "Party", "Bio", "Position", "Candidate Photo", "Party Symbol"])
+        for candidate in self.candidates:
+            ws.append(candidate)
+        wb.save("candidates.xlsx")
+
+    def load_candidates_from_excel(self):
+        if not os.path.exists("candidates.xlsx"):
+            self.save_candidates_to_excel()  # Create the file if it doesn't exist
+
+        try:
+            wb = load_workbook("candidates.xlsx")
+            ws = wb.active
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                self.candidates.append(row)
+            self.update_treeview()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
     def create_add_delete_candidate_section(self):
         tk.Label(self.root, text="Candidate Name:", font=('Helvetica', 12)).grid(row=3, column=1, padx=5, pady=2, sticky=tk.E)
@@ -44,7 +70,7 @@ class CandidateManagementSystem:
         tk.Label(self.root, text="Position:", font=('Helvetica', 12)).grid(row=6, column=1, padx=5, pady=2, sticky=tk.E)
         self.position_var = tk.StringVar()
         self.position_entry = ttk.Combobox(self.root, textvariable=self.position_var,
-                                           values=["Prime Minister", "Vice President", "Chief Minister", "Treasurer"], font=('Helvetica', 12))
+                                           values=["MLA", "MP"], font=('Helvetica', 12))
         self.position_entry.grid(row=6, column=2, padx=5, pady=2, columnspan=4, sticky=tk.W + 'nsew')
 
         tk.Label(self.root, text="Candidate Photo:", font=('Helvetica', 12)).grid(row=7, column=1, padx=5, pady=2, sticky=tk.E)
@@ -127,8 +153,9 @@ class CandidateManagementSystem:
     def add_candidate(self):
         if self.ec_mode:        
             self.ec_mode_add_candidate()
+            self.save_candidates_to_excel()
         else:
-            messagebox.showwarning("Access Denied!")
+            messagebox.showwarning("Access Denied!","Please select ec mode.")
 
 
     def ec_mode_add_candidate(self):
@@ -152,8 +179,9 @@ class CandidateManagementSystem:
     def delete_candidate(self):
         if self.ec_mode:
             self.ec_mode_delete_candidate()
+            self.save_candidates_to_excel()
         else:
-            messagebox.showwarning("Access Denied!")
+            messagebox.showwarning("Access Denied!","Please select ec mode.")
 
     def ec_mode_delete_candidate(self):
         if self.authenticate_ec():
@@ -170,8 +198,11 @@ class CandidateManagementSystem:
         if selected_index:
             index_as_int = int(selected_index[0])
             candidate = self.candidates[index_as_int - 1]
-            if self.ec_mode:
+            '''if self.ec_mode:
                 self.show_candidate_details(candidate)
+            else:
+                messagebox.showwarning("Access Denied!","Please select ec mode.")'''
+            self.show_candidate_details(candidate)
         else:
             messagebox.showwarning("No Candidate Selected", "Please select a candidate to view details.")
 
@@ -179,7 +210,9 @@ class CandidateManagementSystem:
     def show_candidate_details(self, candidate):
         details_window = tk.Toplevel(self.root)
         details_window.title("Candidate Details")
-
+        details_window.attributes('-toolwindow', True)
+        details_window.resizable(width=False, height=False)
+        
         tk.Label(details_window, text="Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Party:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Bio:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
@@ -204,13 +237,14 @@ class CandidateManagementSystem:
         party_symbol = party_symbol.resize((100, 100))
         party_symbol = ImageTk.PhotoImage(party_symbol)
         tk.Label(details_window, image=party_symbol).grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
-        tk.Label(details_window, image=party_symbol).image = party_symbol 
-
+        tk.Label(details_window, image=party_symbol).image = party_symbol
+        details_window.wait_window()
     def modify_details(self):
         if self.ec_mode:
             self.ec_mode_modify_details()
+            self.save_candidates_to_excel()
         else:
-            messagebox.showwarning("Access Denied!")
+            messagebox.showwarning("Access Denied!","Please select ec mode.")
 
     def ec_mode_modify_details(self):
         if self.authenticate_ec():
@@ -223,6 +257,8 @@ class CandidateManagementSystem:
     def modify_candidate_details(self, index):
         details_window = tk.Toplevel(self.root)
         details_window.title("Modify Details")
+        details_window.attributes('-toolwindow', True)
+        details_window.resizable(width=False, height=False)
 
         tk.Label(details_window, text="Candidate Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
         name_entry = tk.Entry(details_window)
@@ -241,7 +277,7 @@ class CandidateManagementSystem:
 
         tk.Label(details_window, text="Position:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
         position_var = tk.StringVar()
-        position_entry = ttk.Combobox(details_window, textvariable=position_var, values=["President", "Vice President", "Secretary", "Treasurer"])
+        position_entry = ttk.Combobox(details_window, textvariable=position_var, values=["MP", "MLA"])
         position_entry.grid(row=3, column=1, padx=10, pady=5, columnspan=3, sticky=tk.W)
         position_entry.set(self.candidates[index][3])
 
@@ -272,7 +308,7 @@ class CandidateManagementSystem:
 
     def save_changes(self, index, name, party, bio, position, candidate_photo, party_symbol):
         if name and party and bio and position and candidate_photo and party_symbol:
-            self.candidates[index] = (name, party, bio, position, candidate_photo, party_symbol, self.candidates[index][6], self.candidates[index][7])
+            self.candidates[index] = (name, party, bio, position, candidate_photo, party_symbol)
             messagebox.showinfo("Changes Saved", "Candidate details have been successfully modified.")
             self.update_treeview()
         else:
@@ -292,11 +328,9 @@ class CandidateManagementSystem:
         self.position_entry.set("")
         self.candidate_photo_path.set("")
         self.party_symbol_path.set("")
-        self.username_entry.delete(0, tk.END)
-        self.password_entry.delete(0, tk.END)
 
     def authenticate_ec(self):
-        password = simpledialog.askstring("Election Commissioner Mode", "Enter your password:", show='*')
+        password = simpledialog.askstring("Election Commissioner Mode", "Enter admin password:", show='*')
         if password == self.admin_password:
             return True
         else:
