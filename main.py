@@ -7,12 +7,14 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 
 def move1():
-    for widget in root.winfo_children():
-        widget.destroy()
-    
+    root.destroy()
+    subprocess.run(["python", "candidate_reg.py"])
+    root.destroy()
 
 def move2():
+    root.destroy()
     subprocess.run(["python", "log.py"])
+    root.destroy()
 
 root = tb.Window(themename="litera", iconphoto=None)
 root.configure(bg="#f5f5f5")
@@ -26,12 +28,12 @@ registration_label.configure(style="Primary.TLabel")
 my_frame = LabelFrame(root, font=("Roboto", 16, "bold"), background="#00FFFF", padx=100, pady=100)
 my_frame.place(relx=0.5, rely=0.5, anchor='center')
 
-my_style=tb.Style()
-my_style.configure('success.Outline.TButton',font=("Helvetica",25))
-my_button1 = tb.Button(my_frame, text="Candidate Registration", bootstyle="success",style="success.Outline.TButton",width=30,command=move1)
+my_style = tb.Style()
+my_style.configure('success.Outline.TButton', font=("Helvetica", 25))
+my_button1 = tb.Button(my_frame, text="Candidate Registration", bootstyle="success", style="success.Outline.TButton", width=30, command=move1)
 my_button1.pack(pady=(20, 0), padx=20)
 
-my_button2 = tb.Button(my_frame, text="Voting Interface", bootstyle="success",style="success.Outline.TButton",width=30,command=move2)
+my_button2 = tb.Button(my_frame, text="Voting Interface", bootstyle="success", style="success.Outline.TButton", width=30, command=move2)
 my_button2.pack(pady=(60, 0), padx=20)
 
 original_image = Image.open("emblem.png")

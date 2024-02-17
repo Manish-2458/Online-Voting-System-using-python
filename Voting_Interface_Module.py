@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import openpyxl
+import subprocess
 
 class ImageApp:
     def __init__(self, root):
@@ -106,6 +107,13 @@ class ImageApp:
 
         label = tk.Label(self.root, text="Thanks for voting!", font=("Helvetica", 24), pady=50)
         label.pack(fill=tk.BOTH, expand=True)
+        
+        self.root.after(5000, self.redirect_to_login)
+        
+    def redirect_to_login(self):
+        self.root.destroy()
+        # Open Voting_Inteface_Module.py
+        subprocess.run(["python", "log.py"])
 
 if __name__ == "__main__":
     root = tk.Tk()

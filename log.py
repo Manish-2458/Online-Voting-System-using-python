@@ -4,12 +4,13 @@ import ttkbootstrap as tb
 import datetime
 from PIL import Image, ImageTk
 import openpyxl
+import subprocess
 
 def check_credentials(election_id, date_of_birth):
     try:
-        datetime.datetime.strptime(date_of_birth, '%Y/%m/%d')
+        dob_datetime = datetime.datetime.strptime(date_of_birth, '%Y/%m/%d')
     except ValueError:
-        return False
+        return False, None
 
     wb = openpyxl.load_workbook("userdata.xlsx")
     ws = wb.active
@@ -18,25 +19,37 @@ def check_credentials(election_id, date_of_birth):
         if row[1] is None:
             continue
         excel_dob = row[1].strftime('%Y/%m/%d')
-        if str(row[0]).strip() == str(election_id).strip() and str(excel_dob).strip() == str(date_of_birth).strip():
+        if str(row[0]).strip() == str(election_id).strip() and excel_dob == date_of_birth:
             flag_cell = ws.cell(row=idx, column=3)
             flag = flag_cell.value
             if flag == 0:
                 flag_cell.value = 1
                 wb.save("userdata.xlsx")
-                return True
+                return True, wb  # Return the workbook to save later
             else:
-                return False
+                return False, None
         found = True
     if not found:
-        return False
+        wb.save("userdata.xlsx")
+    return False, None
 
 def checker():
     election_id = Election_ID.get()
     date_of_birth = DOB.get()
 
-    if check_credentials(election_id, date_of_birth):
+    # Check if fields are empty
+    if election_id.strip() == "" or date_of_birth.strip() == "":
+        login_label.config(text="All fields must be filled before login", fg="red")
+        return
+    success, wb = check_credentials(election_id, date_of_birth)
+    if success:
         login_label.config(text="Login Successful", fg="green")
+        # Save the workbook here
+        if wb:
+            wb.save("userdata.xlsx")
+        root.destroy()
+        # Open Voting_Inteface_Module.py
+        subprocess.run(["python", "Voting_Interface_Module.py"])
     else:
         login_label.config(text="Invalid credentials", fg="red")
 

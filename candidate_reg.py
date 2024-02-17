@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from ttkbootstrap import Style
 from openpyxl import Workbook, load_workbook
 import os
+import subprocess
 
 class CandidateManagementSystem:
     def __init__(self, root):
@@ -31,7 +32,48 @@ class CandidateManagementSystem:
 
         tk.Label(root, text="").grid(row=13, column=0)
 
+        self.headers = ["ID", "Name", "Position", "Party"]
 
+        # Add a dictionary to keep track of sorting directions
+        self.sort_directions = {
+            "ID": True,
+            "Name": True,
+            "Position": True,
+            "Party": True
+        }
+
+        # Bind the heading click events to the sorting function
+        self.candidate_tree.heading("ID", command=lambda: self.sort_column("ID"))
+        self.candidate_tree.heading("Name", command=lambda: self.sort_column("Name"))
+        self.candidate_tree.heading("Position", command=lambda: self.sort_column("Position"))
+        self.candidate_tree.heading("Party", command=lambda: self.sort_column("Party"))
+
+        # tk.Button(root, text="Exit", command=root.destroy, font=('Helvetica', 12)).grid(row=14, column=0, columnspan=8, pady=10)
+        
+        
+    def sort_column(self, column):
+        candidates = self.candidates[:]
+
+        if column == "ID":
+            candidates.sort(key=lambda x: self.candidates.index(x) + 1)
+        else:
+            candidates.sort(key=lambda x: x[self.headers.index(column)], reverse=self.sort_directions[column])
+
+        # Change the sorting direction
+        if column != "ID":
+            self.sort_directions[column] = not self.sort_directions[column]
+
+        # Clear the existing table
+        for item in self.candidate_tree.get_children():
+            self.candidate_tree.delete(item)
+
+        # Repopulate the table with sorted data
+        for i, candidate_info in enumerate(candidates, start=1):
+            self.candidate_tree.insert("", tk.END, iid=i, values=(i, candidate_info[0], candidate_info[3], candidate_info[1]))
+
+
+
+   
     def save_candidates_to_excel(self):
         wb = Workbook()
         ws = wb.active
@@ -114,6 +156,10 @@ class CandidateManagementSystem:
             self.root.grid_columnconfigure(i, weight=1)
         self.root.grid_rowconfigure(10, weight=1)
 
+    def exit_application(self):
+        self.root.destroy()
+        subprocess.run(["python", "main.py"])
+    
     def create_ec_view_modify_section(self):
         self.mode_var = tk.IntVar()
         tk.Checkbutton(self.root, text="Election Commissioner Mode", variable=self.mode_var, command=self.toggle_ec_mode, font=('Helvetica', 12)).grid(row=13, column=1, columnspan=6, pady=5, sticky=tk.W)
@@ -122,6 +168,8 @@ class CandidateManagementSystem:
         tk.Button(self.root, text="View Details", command=self.view_details, font=('Helvetica', 12)).grid(row=15, column=1,  padx=4, pady=2, sticky='nsew')
         tk.Button(self.root, text="Modify Details", command=self.modify_details, font=('Helvetica', 12)).grid(row=15, column=6, padx=5, pady=2, sticky='nsew')
 
+        tk.Button(self.root, text="Exit", command=self.exit_application, font=('Helvetica', 12)).grid(row=14, column=0, columnspan=8, pady=10)
+        
 
         for i in range(1, 7):
             self.root.grid_columnconfigure(i, weight=1)
@@ -342,3 +390,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CandidateManagementSystem(root)
     root.mainloop()
+
