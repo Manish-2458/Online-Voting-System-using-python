@@ -32,7 +32,7 @@ class CandidateManagementSystem:
 
         tk.Label(root, text="").grid(row=13, column=0)
 
-        self.headers = ["ID", "Name", "Position", "Party"]
+        self.headers = ["ID", "Party Name", "Position", "Party"]
 
         # Add a dictionary to keep track of sorting directions
         self.sort_directions = {
@@ -77,17 +77,18 @@ class CandidateManagementSystem:
     def save_candidates_to_excel(self):
         wb = Workbook()
         ws = wb.active
-        ws.append(["Name", "Party", "Bio", "Position", "Candidate Photo", "Party Symbol"])
+        ws.append(["Party", "Party Symbol", 0,"Position","Name"])
         for candidate in self.candidates:
             ws.append(candidate)
-        wb.save("candidates.xlsx")
+        wb.save("sample.xlsx")
+
 
     def load_candidates_from_excel(self):
-        if not os.path.exists("candidates.xlsx"):
+        if not os.path.exists("sample.xlsx"):
             self.save_candidates_to_excel()  # Create the file if it doesn't exist
 
         try:
-            wb = load_workbook("candidates.xlsx")
+            wb = load_workbook("sample.xlsx")
             ws = wb.active
             for row in ws.iter_rows(min_row=2, values_only=True):
                 self.candidates.append(row)
@@ -105,7 +106,7 @@ class CandidateManagementSystem:
         self.party_entry = tk.Entry(self.root, font=('Helvetica', 12))
         self.party_entry.grid(row=4, column=2, padx=5, pady=2, columnspan=4, sticky=tk.W + 'nsew')
 
-        tk.Label(self.root, text="Candidate Bio:", font=('Helvetica', 12)).grid(row=5, column=1, padx=5, pady=2, sticky=tk.E)
+        tk.Label(self.root, text="Party Symbol", font=('Helvetica', 12)).grid(row=5, column=1, padx=5, pady=2, sticky=tk.E)
         self.bio_entry = tk.Entry(self.root, font=('Helvetica', 12))
         self.bio_entry.grid(row=5, column=2, padx=5, pady=2, columnspan=4, sticky=tk.W + 'nsew')
 
@@ -209,13 +210,13 @@ class CandidateManagementSystem:
     def ec_mode_add_candidate(self):
         name = self.name_entry.get()
         party = self.party_entry.get()
-        bio = self.bio_entry.get()
+        symbol = self.bio_entry.get()
         position = self.position_var.get()
         candidate_photo = self.candidate_photo_path.get()
         party_symbol = self.party_symbol_path.get()
-        if name and party and bio and position and candidate_photo and party_symbol:
+        if name and party and symbol and position and candidate_photo and party_symbol:
             if self.authenticate_ec():
-                candidate_info = (name, party, bio, position, candidate_photo, party_symbol)
+                candidate_info = (party, symbol, 0, position, name )
                 self.candidates.append(candidate_info)
                 self.update_treeview()
                 self.clear_entries()
