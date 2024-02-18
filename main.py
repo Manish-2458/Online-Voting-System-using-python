@@ -15,9 +15,9 @@ def auth(file):
         messagebox.showwarning("Invalid Password", "Incorrect admin password.")
 
 def move1():
-    # root.destroy()
-    # subprocess.run(["python", "candidate_reg.py"])
-    auth("candidate_reg.py")
+    root.destroy()
+    subprocess.run(["python", "candidate_reg.py"])
+    #auth("candidate_reg.py")
 
 def move2():
     root.destroy()
