@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter as tk
+from tkinter import messagebox,simpledialog
 import ttkbootstrap as tb
 import datetime
 from PIL import Image, ImageTk
@@ -63,6 +64,16 @@ def on_focus_out(event, entry_widget, default_text):
         entry_widget.insert(0, default_text)
         entry_widget.config(fg='grey')
 
+def exit_application():
+        pswd =  "admin123"
+        admin_password = simpledialog.askstring("Enter Password","Enter admin password:", show='*')
+        if admin_password == pswd:
+            root.destroy()
+            subprocess.run(["python", "main.py"])
+        else:
+            messagebox.showwarning("Invalid Password", "Incorrect admin password. Can't exit.")
+        
+
 root = tb.Window(themename="litera", iconphoto=None)
 root.configure(bg="#f5f5f5")
 root.attributes('-fullscreen', True)
@@ -93,8 +104,13 @@ entry_dob.pack(pady=15, padx=20)
 my_button = tb.Button(my_frame, text="Log In →", bootstyle="success", command=checker)
 my_button.pack(pady=(60,0), padx=20)
 
+exit_button = tb.Button(my_frame, text="Exit", bootstyle="danger", command=exit_application)
+exit_button.pack(pady=10, padx=20)
+
+
 login_label = Label(my_frame, font=("Roboto", 16))
 login_label.pack(pady=(20,0))
+
 
 original_image = Image.open("emblem.png")
 resized_image = original_image.resize((90, 90))

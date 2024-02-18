@@ -4,17 +4,29 @@ import subprocess
 import ttkbootstrap as tb
 from tkinter import IntVar
 from PIL import Image, ImageTk
-from tkinter import messagebox
+from tkinter import messagebox,simpledialog
+def auth(file):
+    pswd =  "admin123"
+    admin_password = simpledialog.askstring("Enter Password","Enter admin password", show='*')
+    if admin_password == pswd:
+        root.destroy()
+        subprocess.run(["python", file])
+    else:
+        messagebox.showwarning("Invalid Password", "Incorrect admin password.")
 
 def move1():
     root.destroy()
     subprocess.run(["python", "candidate_reg.py"])
-    root.destroy()
+    #auth("candidate_reg.py")
 
 def move2():
     root.destroy()
     subprocess.run(["python", "log.py"])
-    root.destroy()
+
+def move3():
+    # root.destroy()
+    # subprocess.run(["python", "results.py"])
+    auth("results.py")
 
 root = tb.Window(themename="litera", iconphoto=None)
 root.configure(bg="#f5f5f5")
@@ -36,7 +48,10 @@ my_button1.pack(pady=(20, 0), padx=20)
 my_button2 = tb.Button(my_frame, text="Voting Interface", bootstyle="success", style="success.Outline.TButton", width=30, command=move2)
 my_button2.pack(pady=(60, 0), padx=20)
 
-original_image = Image.open("emblem.png")
+my_button3 = tb.Button(my_frame, text="Results", bootstyle="success", style="success.Outline.TButton", width=30, command=move3)
+my_button3.pack(pady=(60, 0), padx=20)
+
+original_image = Image.open("./emblem.png")
 resized_image = original_image.resize((90, 90))
 logo_image = ImageTk.PhotoImage(resized_image)
 
