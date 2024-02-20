@@ -40,6 +40,10 @@ def show_statistical_analysis():
 
     plt.figure(figsize=(8, 6))
 
+    if 'Party_representation' not in filtered_df.columns:
+        print("Error: 'Party_representation' column not found in filtered DataFrame.")
+        return
+
     parties = filtered_df['Party_representation']
     votes = filtered_df['Votes']
 
@@ -96,6 +100,10 @@ right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 file_path = "sample.xlsx"
 original_df = load_excel_data(file_path)
+
+if original_df is None:
+    print("Error: Failed to load Excel data.")
+    exit_program()
 
 localities = ["All"] + original_df['Position'].unique().tolist()
 
