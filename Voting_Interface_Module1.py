@@ -11,7 +11,7 @@ class ImageApp:
         self.root.title("Voting Interface Module")
         self.root.attributes("-fullscreen", True)
 
-        self.folder_path = os.path.join(os.path.dirname(__file__), "Party_Symbols")
+        self.folder_path = os.path.join(os.path.dirname(__file__), "Party_Symbols1")
 
         self.image_files = [f for f in os.listdir(self.folder_path) if f.endswith('.png')]
 
@@ -43,13 +43,13 @@ class ImageApp:
         ws = wb.active
 
         for i, (party_name, vote_count) in enumerate(zip(self.party_names, self.vote_counts), start=2):
-            if(ws.cell(row=i,column=4).value=='MLA'):
+            if(ws.cell(row=i,column=4).value=='MP'):
                 ws.cell(row=i, column=3).value = vote_count
 
         wb.save("sample.xlsx")
 
     def create_widgets(self):
-        header_label = tk.Label(self.root, text="Choose Political Party : MLA", font=("Helvetica", 18), pady=20, fg="blue")
+        header_label = tk.Label(self.root, text="Choose Political Party : MP", font=("Helvetica", 18), pady=20, fg="blue")
         header_label.pack()
 
         canvas = tk.Canvas(self.root, height=self.root.winfo_screenheight())
@@ -103,9 +103,18 @@ class ImageApp:
         party_name = file_name.split('.')[0]
         self.update_data(party_name)
 
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        label = tk.Label(self.root, text="Thanks for voting!", font=("Helvetica", 24), pady=50)
+        label.pack(fill=tk.BOTH, expand=True)
+        
+        self.root.after(5000, self.redirect_to_login)
+        
+    def redirect_to_login(self):
         self.root.destroy()
         # Open Voting_Inteface_Module.py
-        subprocess.run(["python", "Voting_Interface_Module1.py"])
+        subprocess.run(["python", "log.py"])
 
 if __name__ == "__main__":
     root = tk.Tk()

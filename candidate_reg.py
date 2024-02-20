@@ -5,6 +5,7 @@ from ttkbootstrap import Style
 from openpyxl import Workbook, load_workbook
 import os
 import subprocess
+import shutil
 
 class CandidateManagementSystem:
     def __init__(self, root):
@@ -216,6 +217,27 @@ class CandidateManagementSystem:
         party_symbol = self.party_symbol_path.get()
         if name and party and symbol and position and candidate_photo and party_symbol:
             if self.authenticate_ec():
+                # Update path based on position
+                if position == "MLA":
+                    party_symbol_folder = "Party_symbols"
+                elif position == "MP":
+                    party_symbol_folder = "Party_symbols1"
+                else:
+                    messagebox.showwarning("Invalid Position", "Please select a valid position (MLA or MP).")
+                    return
+
+                # Create directory if not exists
+                os.makedirs(party_symbol_folder, exist_ok=True)
+
+                # Extract party symbol file name
+                party_symbol_filename = os.path.basename(party_symbol)
+
+                # Construct new file path
+                new_party_symbol_path = os.path.join(party_symbol_folder, f"{party}.png")
+
+                # Copy party symbol to the appropriate folder and rename it
+                shutil.copy(party_symbol, new_party_symbol_path)
+
                 candidate_info = (party, symbol, 0, position, name )
                 self.candidates.append(candidate_info)
                 self.update_treeview()
