@@ -110,7 +110,7 @@ class ImageApp:
         label.pack(fill=tk.BOTH, expand=True)
         
         self.root.after(5000, self.redirect_to_login)
-        
+                
     def redirect_to_login(self):
         self.root.destroy()
         # Open Voting_Inteface_Module.py
