@@ -19,7 +19,7 @@ class Marquee(tk.Canvas):
     def draw_text(self):
         self.delete("all")
         self.text_id = self.create_text(self.width + self.margin, self.margin, anchor="nw", text=self.text,
-                                        font=("Roboto", 40, "bold"), fill="black")
+                                        font=("Roboto", 40, "bold"), fill="green")
         self.animate()
 
     def on_resize(self, event):
@@ -65,18 +65,32 @@ marquee.place(relx=0.5, rely=0.1, anchor='center', relwidth=1, y=130)
 columns_frame = tk.Frame(root, bg="#f5f5f5")
 columns_frame.place(relx=0.5, rely=0.5, anchor='center', relwidth=1, relheight=0.6)
 
-# Left column for video player
-left_column = tk.Frame(columns_frame, bg="red", width=400)
+# Left column for video player (changed to display GIF)
+left_column = tk.Frame(columns_frame, bg="#f5f5f5", width=400)
 left_column.pack(side="left", fill="both", expand=True)
 
 # Load and display the GIF file
 gif_image = Image.open("Voting.gif")
-gif_photo = ImageTk.PhotoImage(gif_image)
-gif_label = tk.Label(left_column, image=gif_photo)
+gif_frames = []
+try:
+    while True:
+        gif_frames.append(ImageTk.PhotoImage(gif_image.copy()))
+        gif_image.seek(len(gif_frames))
+except EOFError:
+    pass
+
+gif_label = tk.Label(left_column)
 gif_label.pack(expand=True)
 
-# Right column for frame
-right_column = tk.Frame(columns_frame, bg="blue", width=1200)
+def update_gif(frame):
+    gif_label.config(image=gif_frames[frame])
+    frame = (frame + 1) % len(gif_frames)
+    root.after(100, update_gif, frame)
+
+update_gif(0)
+
+# Right column for frame (unchanged)
+right_column = tk.Frame(columns_frame, bg="#f5f5f5", width=1200)
 right_column.pack(side="right", fill="both", expand=True, padx=20, pady=100)  # Add padding here
 
 my_style = tb.Style()
