@@ -3,6 +3,26 @@ import subprocess
 import ttkbootstrap as tb
 from tkinter import messagebox, simpledialog
 from PIL import Image, ImageTk
+import random
+def retrieve_original_list(randomized_list, seed_value):
+    random.seed(seed_value)
+    indices = list(range(len(randomized_list)))
+    random.shuffle(indices)
+    original_list = [value for _, value in sorted(zip(indices, randomized_list))]
+    return original_list
+
+def decrypt(psd, key):
+    qr = [byte for byte in psd]
+    m = len(bin(key).replace("0b", "")) // 2
+    l = key & ((1 << m) - 1)
+    qr = retrieve_original_list(qr, l)
+    k = (key >> m) & ((1 << m) - 1)
+    s = len(qr) // 2
+    qr = [i for i in zip(qr[:s], qr[s:])]
+    a = [chr(k * i[0] + i[1]) for i in qr]
+    psd = ''.join(a)
+    return psd
+
 
 class Marquee(tk.Canvas):
     def __init__(self, parent, text, margin=2, delay=4):
@@ -35,13 +55,18 @@ class Marquee(tk.Canvas):
         self.after(self.delay, self.animate)
 
 def auth(file):
-    pswd = "admin123"
-    admin_password = simpledialog.askstring("Enter Password", "Enter admin password", show='*')
-    if admin_password == pswd:
-        root.destroy()
-        subprocess.run(["python", file])
-    else:
-        messagebox.showwarning("Invalid Password", "Incorrect admin password.")
+    psd = b'\x04\x01\x07\x0e\x02\x0f\x0f\x00\x00\x07\x06\x0f\r\x07\x02\x05'
+    # key = simpledialog.askinteger("Enter Key", "Enter Secret Key",parent=root)
+    key = int(simpledialog.askstring("Enter Key", "Enter Secret Key", show='*',parent=root))
+    if key is not None:
+        pswd = simpledialog.askstring("Enter Password", "Enter admin password", show='*',parent=root)
+        if pswd is not None:
+            psd = decrypt(psd, key)
+            if psd == pswd:
+                root.destroy()
+                subprocess.run(["python", file])
+            else:
+                messagebox.showwarning("Invalid Password", "Incorrect admin password.")
 
 def move1():
     root.destroy()
