@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.cm as cm
+import sys
 
 def load_excel_data(file_path):
     try:
@@ -71,6 +72,7 @@ def show_statistical_analysis():
 def exit_program():
     root.attributes('-fullscreen', False)
     root.destroy()
+    sys.exit()
 
 root = tk.Tk()
 root.title("Excel Data Viewer")
