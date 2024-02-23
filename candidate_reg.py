@@ -73,16 +73,13 @@ class CandidateManagementSystem:
             self.candidate_tree.insert("", tk.END, iid=i, values=(i, candidate_info[0], candidate_info[3], candidate_info[1]))
 
 
-
-   
-    def save_candidates_to_excel(self):
+    def save_candidates_to_excel(self): 
         wb = Workbook()
         ws = wb.active
         ws.append(["Party", "Party_Symbol", "Votes","Position","Name"])
         for candidate in self.candidates:
             ws.append(candidate)
         wb.save("sample.xlsx")
-
 
     def load_candidates_from_excel(self):
         if not os.path.exists("sample.xlsx"):
@@ -172,9 +169,6 @@ class CandidateManagementSystem:
             self.root.grid_columnconfigure(i, weight=1)
         self.root.grid_rowconfigure(11, weight=1)
         self.root.grid_rowconfigure(12, weight=1)
-    def browse_candidate_photo(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
-        self.candidate_photo_path.set(file_path)
 
     def browse_party_symbol(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
@@ -208,9 +202,8 @@ class CandidateManagementSystem:
         party = self.party_entry.get()
         symbol = self.bio_entry.get()
         position = self.position_var.get()
-        candidate_photo = self.candidate_photo_path.get()
         party_symbol = self.party_symbol_path.get()
-        if name and party and symbol and position and candidate_photo and party_symbol:
+        if name and party and symbol and position and party_symbol:
             if self.authenticate_ec():
                 # Update path based on position
                 if position == "MLA":
@@ -251,9 +244,22 @@ class CandidateManagementSystem:
 
     def ec_mode_delete_candidate(self):
         if self.authenticate_ec():
+            
             selected_index = self.candidate_tree.selection()
             if selected_index:
                 deleted_candidate = self.candidates.pop(int(selected_index[0]) - 1)
+                party, _, _, position, _ = deleted_candidate
+                if position == "MLA":
+                    party_symbol_folder = "Party_symbols"
+                else:
+                    party_symbol_folder = "Party_symbols1"
+
+                # Create directory if not exists
+                os.makedirs(party_symbol_folder, exist_ok=True)
+                    # Construct new file path
+                new_party_symbol_path = os.path.join(party_symbol_folder, f"{party}.png")
+                if os.path.exists(new_party_symbol_path):
+                    os.remove(new_party_symbol_path)
                 messagebox.showinfo("Deleted", f"Candidate {deleted_candidate[0]} has been deleted.")
                 self.update_treeview()
             else:
@@ -291,14 +297,6 @@ class CandidateManagementSystem:
         tk.Label(details_window, text=candidate[3]).grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
         tk.Label(details_window, text=candidate[4]).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
 
-
-        candidate_photo = Image.open(candidate[4])
-        candidate_photo = candidate_photo.resize((100, 100))
-        candidate_photo = ImageTk.PhotoImage(candidate_photo)
-        tk.Label(details_window, image=candidate_photo).grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
-        tk.Label(details_window, image=candidate_photo).image = candidate_photo 
-
-
         party_symbol = Image.open(candidate[5])
         party_symbol = party_symbol.resize((100, 100))
         party_symbol = ImageTk.PhotoImage(party_symbol)
@@ -315,6 +313,7 @@ class CandidateManagementSystem:
     def ec_mode_modify_details(self):
         if self.authenticate_ec():
             selected_index = self.candidate_tree.selection()
+        
             if selected_index:
                 self.modify_candidate_details(int(selected_index[0]) - 1)
             else:
@@ -326,20 +325,15 @@ class CandidateManagementSystem:
         details_window.attributes('-toolwindow', True)
         details_window.resizable(width=False, height=False)
 
-        tk.Label(details_window, text="Candidate Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Party Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
         name_entry = tk.Entry(details_window)
         name_entry.grid(row=0, column=1, padx=10, pady=5, columnspan=2)
         name_entry.insert(0, self.candidates[index][0])
 
-        tk.Label(details_window, text="Party Affiliation:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Party Symbol:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
         party_entry = tk.Entry(details_window)
         party_entry.grid(row=1, column=1, padx=10, pady=5, columnspan=3)
         party_entry.insert(0, self.candidates[index][1])
-
-        tk.Label(details_window, text="Candidate Bio:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
-        bio_entry = tk.Entry(details_window)
-        bio_entry.grid(row=2, column=1, padx=10, pady=5, columnspan=3)
-        bio_entry.insert(0, self.candidates[index][2])
 
         tk.Label(details_window, text="Position:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
         position_var = tk.StringVar()
@@ -347,22 +341,34 @@ class CandidateManagementSystem:
         position_entry.grid(row=3, column=1, padx=10, pady=5, columnspan=3, sticky=tk.W)
         position_entry.set(self.candidates[index][3])
 
-        # tk.Label(details_window, text="Candidate Photo:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
-        # candidate_photo_path_var = tk.StringVar()
-        # tk.Entry(details_window, textvariable=candidate_photo_path_var).grid(row=4, column=1, padx=10, pady=5, columnspan=2)
-        # tk.Button(details_window, text="Browse", command=lambda: self.photo_modify(candidate_photo_path_var)).grid(row=4, column=3, padx=10, pady=5)
-
         tk.Label(details_window, text="Party Symbol:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.E)
         party_symbol_path_var = tk.StringVar()
         tk.Entry(details_window, textvariable=party_symbol_path_var).grid(row=5, column=1, padx=10, pady=5, columnspan=2)
         tk.Button(details_window, text="Browse", command=lambda: self.browse_party_symbol_modify(party_symbol_path_var)).grid(row=5, column=3, padx=10, pady=5)
 
+        tk.Button(details_window, text="Save Changes", command=lambda: self.save_changes(index, name_entry.get(), party_entry.get(), position_var.get(), party_symbol_path_var.get()), font=('Helvetica', 12)).grid(row=6, column=0, columnspan=4, pady=10)
 
-        candidate_photo_path_var.set(self.candidates[index][4])
         party_symbol_path_var.set(self.candidates[index][5])
 
+        # Update path based on position
+        if position_entry == "MLA":
+            party_symbol_folder = "Party_symbols"
+        elif position_entry == "MP":
+            party_symbol_folder = "Party_symbols1"
+        else:
+            messagebox.showwarning("Invalid Position", "Please select a valid position (MLA or MP).")
+            return
 
-        tk.Button(details_window, text="Save Changes", command=lambda: self.save_changes(index, name_entry.get(), party_entry.get(), bio_entry.get(), position_var.get(), candidate_photo_path_var.get(), party_symbol_path_var.get()), font=('Helvetica', 12)).grid(row=6, column=0, columnspan=4, pady=10)
+        # Create directory if not exists
+        os.makedirs(party_symbol_folder, exist_ok=True)
+
+        # Construct new file path
+        new_party_symbol_path = os.path.join(party_symbol_folder, f"{name_entry}.png")
+        if os.path.exists(new_party_symbol_path):
+            os.remove(new_party_symbol_path)
+
+        # Copy party symbol to the appropriate folder and rename it
+        shutil.copy(party_symbol_path_var, new_party_symbol_path)
 
     def photo_modify(self, photo_path_var):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
@@ -392,7 +398,6 @@ class CandidateManagementSystem:
         self.party_entry.delete(0, tk.END)
         self.bio_entry.delete(0, tk.END)
         self.position_entry.set("")
-        self.candidate_photo_path.set("")
         self.party_symbol_path.set("")
 
     def authenticate_ec(self):

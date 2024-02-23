@@ -37,14 +37,17 @@ class ImageApp:
 
     def update_data(self, party_name):
         idx = self.party_names.index(party_name)
-        self.vote_counts[idx] = int(self.vote_counts[idx])+ 1
+        self.vote_counts[idx] = int(self.vote_counts[idx]) + 1
+        print(f"Updated vote count for {party_name}: {self.vote_counts[idx]}")
 
         wb = openpyxl.load_workbook("sample.xlsx")
         ws = wb.active
 
-        for i, (party_name, vote_count) in enumerate(zip(self.party_names, self.vote_counts), start=2):
-            if(ws.cell(row=i,column=4).value=='MP'):
-                ws.cell(row=i, column=3).value = vote_count
+        for i, name in enumerate(self.party_names, start=2):
+            if name == party_name and ws.cell(row=i, column=4).value == 'MP':
+                ws.cell(row=i, column=3).value = self.vote_counts[idx]
+                print(f"Updated Excel for {party_name}: {self.vote_counts[idx]}")
+                break  # Exit loop once the party is found and updated
 
         wb.save("sample.xlsx")
 
