@@ -41,18 +41,18 @@ def show_statistical_analysis():
 
     plt.figure(figsize=(8, 6))
 
-    if 'Party_representation' not in filtered_df.columns:
-        print("Error: 'Party_representation' column not found in filtered DataFrame.")
+    if 'Party_Symbol' not in filtered_df.columns:
+        print("Error: 'Party_Symbol' column not found in filtered DataFrame.")
         return
 
-    parties = filtered_df['Party_representation']
+    parties = filtered_df['Party_Symbol']
     votes = filtered_df['Votes']
 
     colors = cm.get_cmap('viridis', len(parties))
 
-    for Party_representation, vote, color in zip(parties, votes, colors(range(len(parties)))):
-        plt.bar(Party_representation, vote, label=f'{vote}', color=color, edgecolor='black', linewidth=0.5, alpha=0.7, align='center')
-        plt.text(Party_representation, vote + 0.1, str(vote), ha='center', va='bottom')
+    for Party_Symbol, vote, color in zip(parties, votes, colors(range(len(parties)))):
+        plt.bar(Party_Symbol, vote, label=f'{vote}', color=color, edgecolor='black', linewidth=0.5, alpha=0.7, align='center')
+        plt.text(Party_Symbol, vote + 0.1, str(vote), ha='center', va='bottom')
 
     plt.xlabel('Parties')
     plt.ylabel('Votes')

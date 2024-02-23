@@ -78,7 +78,7 @@ class CandidateManagementSystem:
     def save_candidates_to_excel(self):
         wb = Workbook()
         ws = wb.active
-        ws.append(["Party", "Party Symbol", 0,"Position","Name"])
+        ws.append(["Party", "Party_Symbol", "Votes","Position","Name"])
         for candidate in self.candidates:
             ws.append(candidate)
         wb.save("sample.xlsx")
@@ -116,11 +116,6 @@ class CandidateManagementSystem:
         self.position_entry = ttk.Combobox(self.root, textvariable=self.position_var,
                                            values=["MLA", "MP"], font=('Helvetica', 12))
         self.position_entry.grid(row=6, column=2, padx=5, pady=2, columnspan=4, sticky=tk.W + 'nsew')
-
-        tk.Label(self.root, text="Candidate Photo:", font=('Helvetica', 12)).grid(row=7, column=1, padx=5, pady=2, sticky=tk.E)
-        self.candidate_photo_path = tk.StringVar()
-        tk.Entry(self.root, textvariable=self.candidate_photo_path, font=('Helvetica', 12)).grid(row=7, column=2, padx=5, pady=2, columnspan=3, sticky=tk.W + 'nsew')
-        tk.Button(self.root, text="Browse", command=self.browse_candidate_photo, font=('Helvetica', 12)).grid(row=7, column=5, padx=5, pady=2, sticky=tk.W + 'nsew')
 
         tk.Label(self.root, text="Party Symbol:", font=('Helvetica', 12)).grid(row=8, column=1, padx=5, pady=2, sticky=tk.E)
         self.party_symbol_path = tk.StringVar()
@@ -284,17 +279,17 @@ class CandidateManagementSystem:
         details_window.attributes('-toolwindow', True)
         details_window.resizable(width=False, height=False)
         
-        tk.Label(details_window, text="Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
-        tk.Label(details_window, text="Party:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
-        tk.Label(details_window, text="Bio:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
-        tk.Label(details_window, text="Position:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
-        tk.Label(details_window, text="Photo:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
-        tk.Label(details_window, text="Symbol:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Party Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Party Affiliation:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
+        # tk.Label(details_window, text="Bio:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Position:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Name:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
+        tk.Label(details_window, text="Symbol:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
 
         tk.Label(details_window, text=candidate[0]).grid(row=0, column=1, padx=10, pady=5, sticky=tk.W)
         tk.Label(details_window, text=candidate[1]).grid(row=1, column=1, padx=10, pady=5, sticky=tk.W)
-        tk.Label(details_window, text=candidate[2]).grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
-        tk.Label(details_window, text=candidate[3]).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
+        tk.Label(details_window, text=candidate[3]).grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
+        tk.Label(details_window, text=candidate[4]).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
 
 
         candidate_photo = Image.open(candidate[4])
@@ -352,10 +347,10 @@ class CandidateManagementSystem:
         position_entry.grid(row=3, column=1, padx=10, pady=5, columnspan=3, sticky=tk.W)
         position_entry.set(self.candidates[index][3])
 
-        tk.Label(details_window, text="Candidate Photo:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
-        candidate_photo_path_var = tk.StringVar()
-        tk.Entry(details_window, textvariable=candidate_photo_path_var).grid(row=4, column=1, padx=10, pady=5, columnspan=2)
-        tk.Button(details_window, text="Browse", command=lambda: self.photo_modify(candidate_photo_path_var)).grid(row=4, column=3, padx=10, pady=5)
+        # tk.Label(details_window, text="Candidate Photo:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
+        # candidate_photo_path_var = tk.StringVar()
+        # tk.Entry(details_window, textvariable=candidate_photo_path_var).grid(row=4, column=1, padx=10, pady=5, columnspan=2)
+        # tk.Button(details_window, text="Browse", command=lambda: self.photo_modify(candidate_photo_path_var)).grid(row=4, column=3, padx=10, pady=5)
 
         tk.Label(details_window, text="Party Symbol:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.E)
         party_symbol_path_var = tk.StringVar()
