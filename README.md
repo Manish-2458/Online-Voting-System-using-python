@@ -34,7 +34,8 @@ This Python project implements a voting system with two interfaces:
  Example:
   
  In terminal: `pip install shutil` 
-  
+
+  
  For collab or kaggle notebooks: `!pip install shutil` 
 
 ## Usage 
