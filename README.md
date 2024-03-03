@@ -55,12 +55,12 @@ This Python project implements a voting system with two interfaces:
 ## Structure 
 
 - **Admin Module**:
-- Register candidates with password protection .
+  - Register candidates with password protection .
 - **User Module**:
-- Log in .
-- Cast votes for MLA and MP ️.
+  - Log in for voters.
+  - Cast votes for MLA and MP ️.
 - **Results Module**:
-- Visualize election results .
+  - Visualize election results .
 
 ## Contributing 
 
