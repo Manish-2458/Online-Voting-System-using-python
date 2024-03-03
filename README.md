@@ -54,6 +54,6 @@ This Python project implements a voting system with two interfaces:
 Contributions are welcome! Please feel free to fork this repository and submit pull requests to suggest improvements.
 
 ## License
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU GENERAL PUBLIC LICENSE 3.0](LICENSE).
 
 ![Vote Symbol](https://th.bing.com/th/id/R.497a04924609f9334839a7056dc87738?rik=UO94nCCwnf4Hxg&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fvote-png-hd-free-voting-box-png-clipart-1024.png&ehk=nGNj%2ferSxyvUU0nT5i%2bRzF438Xl%2bRv9iB%2bCB4kgRwBg%3d&risl=&pid=ImgRaw)
