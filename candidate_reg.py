@@ -12,7 +12,7 @@ class CandidateManagementSystem:
         self.root = root
         self.root.title("Candidate Management System")
 
-        #self.style = Style("lumen")
+        #self.style = Style("minty")
         self.root.attributes("-fullscreen", True)
         self.candidates = []
         self.admin_password = "admin123"
@@ -120,7 +120,7 @@ class CandidateManagementSystem:
         tk.Button(self.root, text="View Details", command=self.view_details, font=('Helvetica', 12)).grid(row=15, column=1,  padx=4, pady=2, sticky='nsew')
         tk.Button(self.root, text="Modify Details", command=self.modify_details, font=('Helvetica', 12)).grid(row=15, column=6, padx=5, pady=2, sticky='nsew')
 
-        tk.Button(self.root, text="Exit", command=self.exit_application, font=('Helvetica', 12)).grid(row=14, column=0, columnspan=8, pady=10)
+        tk.Button(self.root, text="Exit", command=self.exit_application, font=('Helvetica', 12),).grid(row=14, column=0, columnspan=8, pady=10)
         
 
         for i in range(1, 7):
@@ -204,10 +204,6 @@ class CandidateManagementSystem:
         if selected_index:
             index_as_int = int(selected_index[0])
             candidate = self.candidates[index_as_int - 1]
-            '''if self.ec_mode:
-                self.show_candidate_details(candidate)
-            else:
-                messagebox.showwarning("Access Denied!","Please select ec mode.")'''
             self.show_candidate_details(candidate)
         else:
             messagebox.showwarning("No Candidate Selected", "Please select a candidate to view details.")
@@ -221,7 +217,6 @@ class CandidateManagementSystem:
         
         tk.Label(details_window, text="Party Name:").grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Party Affiliation:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
-        # tk.Label(details_window, text="Bio:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Position:").grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Name:").grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
         tk.Label(details_window, text="Symbol:").grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
@@ -231,12 +226,20 @@ class CandidateManagementSystem:
         tk.Label(details_window, text=candidate[3]).grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
         tk.Label(details_window, text=candidate[4]).grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
 
-        party_symbol = Image.open(candidate[5])
+        if candidate[3] == 'MLA':
+            img = './Party_Symbols/'+ candidate[0] + '.png'
+        elif candidate[3] == 'MP':
+            img = './Party_Symbols1/'+ candidate[0] + '.png'
+        else:
+            img = 'broken.png'
+
+        party_symbol = Image.open(img)
         party_symbol = party_symbol.resize((100, 100))
         party_symbol = ImageTk.PhotoImage(party_symbol)
         tk.Label(details_window, image=party_symbol).grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
         tk.Label(details_window, image=party_symbol).image = party_symbol
         details_window.wait_window()
+
     def modify_details(self):
         if self.ec_mode:
             if self.authenticate_ec():
@@ -245,12 +248,16 @@ class CandidateManagementSystem:
                 if selected_index:
                     self.modify_candidate_details(int(selected_index[0]) - 1)
                 else:
-                    messagebox.showwarning("No Candidate Selected", "Please select a candidate to delete.")
+                    messagebox.showwarning("No Candidate Selected", "Please select a candidate to modify.")
             self.save_candidates_to_excel()
         else:
             messagebox.showwarning("Access Denied!","Please select ec mode.")
 
-    def modify_candidate_details(self, index):
+    def browse_party_symbol_modify(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
+        return file_path
+    
+    def modify_candidate_details(self, index, path=''):
         details_window = tk.Toplevel(self.root)
         details_window.title("Modify Details")
         details_window.attributes('-toolwindow', True)
@@ -260,8 +267,8 @@ class CandidateManagementSystem:
         name_entry = tk.Entry(details_window)
         name_entry.grid(row=0, column=1, padx=10, pady=5, columnspan=2)
         name_entry.insert(0, self.candidates[index][0])
-
-        tk.Label(details_window, text="Party Symbol:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
+ 
+        tk.Label(details_window, text="Party Affiliation:").grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
         party_entry = tk.Entry(details_window)
         party_entry.grid(row=1, column=1, padx=10, pady=5, columnspan=3)
         party_entry.insert(0, self.candidates[index][1])
@@ -275,38 +282,74 @@ class CandidateManagementSystem:
         tk.Label(details_window, text="Party Symbol:").grid(row=5, column=0, padx=10, pady=5, sticky=tk.E)
         party_symbol_path_var = tk.StringVar()
         tk.Entry(details_window, textvariable=party_symbol_path_var).grid(row=5, column=1, padx=10, pady=5, columnspan=2)
-        tk.Button(details_window, text="Browse", command=lambda: self.browse_party_symbol_modify(party_symbol_path_var)).grid(row=5, column=3, padx=10, pady=5)
+        
+        def browse():
+            path = self.browse_party_symbol_modify()
+            self.modify_candidate_details(index, path)
+            #party_symbol_path_var.set(path)
 
-        tk.Button(details_window, text="Save Changes", command=lambda: self.save_changes(index, name_entry.get(), party_entry.get(), position_var.get(), party_symbol_path_var.get()), font=('Helvetica', 12)).grid(row=6, column=0, columnspan=4, pady=10)
+        tk.Button(details_window, text="Browse", command=lambda: browse()).grid(row=5, column=3, padx=10, pady=5)
+        def save_action():
+            new_name = name_entry.get()
+            new_party = party_entry.get()
+            new_position = position_var.get()
+            new_symbol_path = party_symbol_path_var.get()
+            new_symbol_path = self.symbol_modify(new_symbol_path, new_position, new_name, old_img)
+            self.save_changes(index, new_name, new_party, new_position)
 
-        party_symbol_path_var.set(self.candidates[index][5])
-        if position_entry == "MLA":
+        tk.Button(details_window, text="Save Changes", command=lambda: save_action(), font=('Helvetica', 12)).grid(row=6, column=0, columnspan=4, pady=10)
+        if self.candidates[index][3] == "MLA":
             party_symbol_folder = "Party_symbols"
-        elif position_entry == "MP":
+        elif self.candidates[index][3] == "MP":
             party_symbol_folder = "Party_symbols1"
         else:
             messagebox.showwarning("Invalid Position", "Please select a valid position (MLA or MP).")
             return
+        
+        current_directory = os.getcwd()
+        old_img = current_directory+"\\"+party_symbol_folder+f"\\{name_entry.get()}.png"
+        if path:
+            party_symbol_path_var.set(path)
+        else:
+            party_symbol_path_var.set(old_img)
+
+    
+    def symbol_modify(self, party_symbol_path, position, name, old_img):
+        if position == "MLA":
+            party_symbol_folder = "Party_symbols"
+        elif position == "MP":
+            party_symbol_folder = "Party_symbols1"
+        else:
+            raise ValueError("Invalid position. Must be 'MP' or 'MLA'.")
 
         os.makedirs(party_symbol_folder, exist_ok=True)
-        new_party_symbol_path = os.path.join(party_symbol_folder, f"{name_entry}.png")
-        if os.path.exists(new_party_symbol_path):
-            os.remove(new_party_symbol_path)
-        shutil.copy(party_symbol_path_var, new_party_symbol_path)
+        current_directory = os.getcwd()
+        new_party_symbol_path = current_directory+"\\"+party_symbol_folder+f"\\{name}.png"
+        src_norm = os.path.normcase(party_symbol_path)
+        dst_norm = os.path.normcase(new_party_symbol_path)
+        if src_norm == dst_norm:
+            os.rename(party_symbol_path, new_party_symbol_path)
+            return new_party_symbol_path
+        else:
+            shutil.copy(party_symbol_path, new_party_symbol_path)     
+            src_norm = os.path.normcase(old_img) 
+            if src_norm != dst_norm:
+                if os.path.exists(old_img):
+                    os.remove(old_img)
+            return new_party_symbol_path
 
     def photo_modify(self, photo_path_var):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
         photo_path_var.set(file_path)
 
-    def browse_party_symbol_modify(self, symbol_path_var):
-        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
-        symbol_path_var.set(file_path)
-
-    def save_changes(self, index, name, party, bio, position, candidate_photo, party_symbol):
-        if name and party and bio and position and candidate_photo and party_symbol:
-            self.candidates[index] = (name, party, bio, position, candidate_photo, party_symbol)
+    
+    
+    def save_changes(self, index, name, party, position):
+        if name and party and position:
+            self.candidates[index] = (name, party, self.candidates[index][2], position, self.candidates[index][4])
             messagebox.showinfo("Changes Saved", "Candidate details have been successfully modified.")
             self.update_treeview()
+            self.save_candidates_to_excel()
         else:
             messagebox.showwarning("Incomplete Information", "Please fill in all fields.")
 
