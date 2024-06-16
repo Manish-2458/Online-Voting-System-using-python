@@ -4,6 +4,8 @@ import ttkbootstrap as tb
 from tkinter import messagebox, simpledialog
 from PIL import Image, ImageTk
 import random
+import sys
+
 def retrieve_original_list(randomized_list, seed_value):
     random.seed(seed_value)
     indices = list(range(len(randomized_list)))
@@ -129,6 +131,14 @@ my_button2.pack(pady=(60, 0), padx=20)
 
 my_button3 = tb.Button(right_column, text="Results", bootstyle="success", style="success.Outline.TButton", width=30, command=move3)
 my_button3.pack(pady=(60, 0), padx=20)
+
+def exit_program():
+    root.attributes('-fullscreen', False)
+    root.destroy()
+    sys.exit()
+
+my_button4 = tb.Button(right_column, text="Exit", bootstyle="danger", style="danger.Outline.TButton", width=10, command=exit_program)
+my_button4.pack(pady=(60, 0), padx=20)
 
 # Create a frame for the emblem image
 emblem_frame = tk.Frame(root, bg="#f5f5f5")
